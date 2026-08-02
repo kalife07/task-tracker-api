@@ -1,0 +1,47 @@
+{
+  "name": "task-tracker-api-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "jest --runInBand",
+    "test:api": "jest --runInBand --selectProjects api",
+    "test:backend": "jest --runInBand --selectProjects api",
+    "test:frontend": "jest --runInBand --selectProjects frontend",
+    "test:watch": "jest --watch --runInBand"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "projects": [
+      {
+        "displayName": "api",
+        "testEnvironment": "node",
+        "testMatch": ["<rootDir>/tests/**/*.test.js"],
+        "globalSetup": "<rootDir>/tests/globalSetup.js",
+        "globalTeardown": "<rootDir>/tests/globalTeardown.js",
+        "testTimeout": 15000
+      },
+      {
+        "displayName": "frontend",
+        "testEnvironment": "jsdom",
+        "testMatch": ["<rootDir>/frontend/**/*.test.jsx"],
+        "setupFilesAfterEnv": ["<rootDir>/frontend/jest.setup.js"],
+        "transform": {
+          "^.+\\.(js|jsx)$": "babel-jest"
+        },
+        "moduleFileExtensions": ["js", "jsx"]
+      }
+    ]
+  }
+}
