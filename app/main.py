@@ -4,16 +4,18 @@
 
 from fastapi import FastAPI
 
+from app import __version__
 from app.core.config import settings
 from app.api.routes.health import router as health_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.testing import router as testing_router
+from app.api.routes.version import router as version_router
 
 # Create the FastAPI application instance.
 # The title and version appear in the auto-generated /docs (Swagger UI).
 app = FastAPI(
     title="Task Tracker API",
-    version="0.1.0",
+    version=__version__,
 description="A learning-focused REST API built with FastAPI and JSON file storage"
 )
 
@@ -23,6 +25,7 @@ description="A learning-focused REST API built with FastAPI and JSON file storag
 app.include_router(health_router)
 app.include_router(tasks_router)
 app.include_router(testing_router)
+app.include_router(version_router)
 
 
 # Optional: log the active environment on startup so it's clear which
