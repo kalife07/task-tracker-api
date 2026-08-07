@@ -32,4 +32,10 @@ app.include_router(version_router)
 # .env values were loaded (helpful when switching between dev/prod configs).
 @app.on_event("startup")
 async def on_startup() -> None:
+    """Log the active environment and port when the app starts.
+
+    Returns:
+        None: This is a side-effecting startup hook; it only prints to
+        stdout and does not return a value.
+    """
     print(f"[startup] APP_ENV={settings.app_env}  PORT={settings.port}")

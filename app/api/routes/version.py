@@ -13,5 +13,12 @@ router = APIRouter()
     description="Returns the current API version.",
 )
 def get_version() -> VersionResponse:
-    """Return the API's version string."""
+    """Return the running API's version string.
+
+    Returns:
+        VersionResponse: ``version`` set to the ``app.__version__`` constant.
+
+    Example:
+        GET /version -> 200 {"version": "0.1.0"}
+    """
     return VersionResponse(version=__version__)
