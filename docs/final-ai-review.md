@@ -1,0 +1,47 @@
+# Final AI Review and Ownership Evidence
+
+## AGENTS.md guardrails
+
+- Repo-specific stack and commands included: yes — Python/FastAPI stack, `pytest -v`, `uvicorn app.main:app --reload --port 8000`, and npm/Jest commands are all documented in AGENTS.md Section 2.
+- Docs-first/read-first guardrail included: yes — Section 5 ("Final project guardrails") requires reading `README.md`, `AGENTS.md`, and relevant `docs/` files before proposing or making any change.
+- Unexpected app/frontend edits rule included: yes — Section 5 restricts `app/` and `frontend/` changes to small, explainable bug/security/documentation-supported fixes, logged in this file.
+
+## AI code review mini-log
+
+Diff reviewed: `.github/workflows/ci.yml` (Python version pin) and `Dockerfile` (Python version pin + added `HEALTHCHECK`), made while bringing Part B into line with the README's stated "Python 3.12+" prerequisite.
+
+
+| AI comment                                                                                                                   | Grade: Useful / Noise / Wrong | Reason                                                                                                                                                                             | Verification or decision                                                |
+| ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| "CI is pinned to Python 3.11 while the README requires 3.12+; these should match."                                           | Useful                        | Real inconsistency — README Prerequisites explicitly says 3.12+, and a mismatched CI version could hide version-specific bugs before they reach contributors running 3.12 locally. | Accepted. Updated `ci.yml` to `python-version: "3.12"`.                 |
+| "The Dockerfile has no HEALTHCHECK instruction; Part B requires verifying `/health` returns 200, so add one."                | Useful                        | Directly ties to a graded requirement (Docker runtime verification) and gives a repeatable, automatic check instead of relying only on a manual curl.                              | Accepted. Added a `HEALTHCHECK` hitting `/health` with a 30s interval.  |
+| "Consider adding a `.dockerignore` entry for `node_modules` at the repo root in case a future frontend build step needs it." | Noise                         | `node_modules` was already excluded in the original `.dockerignore`, and the Dockerfile does not copy or build `frontend/` at all, so this suggestion addressed a non-issue.       | Rejected — no change made; existing `.dockerignore` already covered it. |
+
+
+## AI security mini-review
+
+
+| Finding                                                                                                                                                                 | File evidence                                                                                                  | Grade: Valid / False Positive / Noise | Reason                                                                                                                                                                                                                                                   | Next action                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `pytest` and `httpx` are used by the test suite and CI but are not listed as dependencies.                                                                              | `requirements.txt` (absence), confirmed by AGENTS.md Section 2 and referenced in `.github/workflows/ci.yml`    | Valid                                 | This is a reproducibility and supply-chain risk: `pip install -r requirements.txt` alone will not give a contributor a working test environment, so CI passing "by accident" (pre-installed tooling on the runner image) could mask a real setup gap.    | Add `pytest` and `httpx` to `requirements.txt` or a separate `requirements-dev.txt`, and document which one in the README. |
+| `POST /test/reset` is only guarded by an `APP_ENV=test` check and is hidden from the OpenAPI schema, but the guard logic itself wasn't independently re-verified by AI. | `app/api/routes/testing.py`, `app/core/config.py` (per AGENTS.md Section 1)                                    | Valid                                 | An unguarded reset endpoint reachable in a non-test environment would let anyone wipe task data with no authentication. AI flagged the existence of the guard but did not execute a live check that it actually blocks the route outside `APP_ENV=test`. | Verified manually — see Manual check below.                                                                                |
+| `.dockerignore` excludes `data/*.json` as a guess at the JSON storage path, without confirming that path against `app/storage.py`.                                      | `.dockerignore`, cross-checked against AGENTS.md Section 1 ("Persistence: in-memory dict in `app/storage.py`") | False Positive                        | AGENTS.md's own file inspection shows storage is in-memory, not a JSON file on disk, so there is no real local data file at risk of being baked into the image. The `.dockerignore` pattern is harmless but unnecessary.                                 | No action required; leaving the pattern in place is low-cost but could be removed for clarity in a later cleanup pass.     |
+
+
+## Manual security check
+
+I did not just accept the AI's note that `/test/reset` is "guarded." I started the API locally without setting `APP_ENV=test` (i.e., using the default `.env` copied from `.env.example`) and sent `POST http://localhost:8000/test/reset` with curl. It returned `404 Not Found`, confirming the route is not registered outside the test environment rather than just returning a 403 or silently no-op'ing. I also re-ran the same request after starting the server with `APP_ENV=test` set, and confirmed it responded successfully, which is the expected behavior for the Jest API test suite's `globalSetup.js`.
+
+## One AI output I rejected or corrected
+
+While finalizing `.github/workflows/ci.yml`, AI suggested adding `continue-on-error: true` to the pytest step "to keep the pipeline green during development." I rejected this: a CI pipeline that stays green regardless of test outcomes defeats the purpose of the release-readiness check required in Part B, and would let a real regression merge unnoticed. I kept the workflow failing on any test failure, with no `continue-on-error` and no `|| true` shortcuts anywhere in the file.
+
+## Three AI usage rules
+
+1. Never paste: `.env` values, tokens, credentials, production logs, or real personal/customer task data into any AI tool or into the repo.
+2. Always verify: run the actual command (pytest, docker build/run, curl against a live endpoint) myself before accepting an AI claim that something "works" or "is fixed" — AI-reported success is a hypothesis, not evidence.
+3. Record AI contributions by: naming the specific file and change in the README's "AI assistance summary" and logging the review/grading of any nontrivial AI suggestion in this document, rather than a generic "AI helped."
+
+## Ownership statement
+
+I'm comfortable submitting this repo as my own work because every change AI proposed — the CI Python version fix, the Dockerfile HEALTHCHECK, the .dockerignore entries — was something I could explain line by line and verify by actually running the command, not just trust because AI said so. I used AI to draft boilerplate (CI syntax, Dockerfile structure) and to do a first-pass review, but I rejected at least one suggestion outright (`continue-on-error`) and manually re-verified a security-relevant claim (the `/test/reset` guard) instead of copying AI's word for it. The AGENTS.md guardrails were followed throughout: changes to `app/` and `frontend/` were avoided entirely, and all final-project work stayed scoped to `docs/`, CI, and Docker configuration. Where AI's own inspection notes surfaced a real inconsistency (README's "JSON file storage" claim vs. the actual in-memory implementation in `app/storage.py`), I kept that discrepancy visible in AGENTS.md rather than smoothing it over. I own the reasoning behind every line in this evidence set, and I know how to reproduce every result recorded here.

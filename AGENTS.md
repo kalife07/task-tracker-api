@@ -1,4 +1,4 @@
-# AGENTS.md
+# [AGENTS.md](http://AGENTS.md)
 
 Guidance for AI coding agents working in the Task Tracker repository.
 
@@ -17,18 +17,20 @@ Task Tracker is a learning-focused REST API (FastAPI / Python) for Kanban-style 
 
 ### Stack (from inspected files)
 
-| Layer | Confirmed from |
-|-------|----------------|
-| Python / FastAPI / Uvicorn / Pydantic / pydantic-settings / python-dotenv | `requirements.txt`, `app/main.py` |
-| In-memory task store | `app/storage.py` |
-| Jest + Supertest (API black-box) | `package.json`, `tests/*.test.js`, `tests/globalSetup.js` |
-| Jest + Testing Library + jsdom (frontend components) | `package.json`, `frontend/**/*.test.jsx` |
-| Pytest + FastAPI `TestClient` | `tests/conftest.py`, `tests/test_*.py`, `.github/workflows/ci.yml` |
-| Env config (`PORT`, `APP_ENV`) | `.env.example`, `app/core/config.py` |
+
+| Layer                                                                     | Confirmed from                                                     |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Python / FastAPI / Uvicorn / Pydantic / pydantic-settings / python-dotenv | `requirements.txt`, `app/main.py`                                  |
+| In-memory task store                                                      | `app/storage.py`                                                   |
+| Jest + Supertest (API black-box)                                          | `package.json`, `tests/*.test.js`, `tests/globalSetup.js`          |
+| Jest + Testing Library + jsdom (frontend components)                      | `package.json`, `frontend/**/*.test.jsx`                           |
+| Pytest + FastAPI `TestClient`                                             | `tests/conftest.py`, `tests/test_*.py`, `.github/workflows/ci.yml` |
+| Env config (`PORT`, `APP_ENV`)                                            | `.env.example`, `app/core/config.py`                               |
+
 
 **Not confirmed as declared dependencies:** `pytest` and `httpx` are used by Python tests / CI but are **not** listed in `requirements.txt`. Local `pytest` success depends on an environment that has them installed.
 
-**Version note:** `README.md` says Python 3.12+; CI uses Python 3.11 (`.github/workflows/ci.yml`). Treat exact supported Python minor as **not fully confirmed**.
+**Version note:** `README.md` requires Python 3.12+, and `.github/workflows/ci.yml` is pinned to Python 3.12 — these are now consistent as of the final-project branch.
 
 ### Setup / run (documented and consistent with layout)
 
@@ -39,6 +41,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 npm install
 uvicorn app.main:app --reload --port 8000
+
 ```
 
 - API: `http://localhost:8000`
@@ -52,7 +55,8 @@ npm test              # Jest api + frontend projects, --runInBand
 npm run test:api      # tests/**/*.test.js (spawns uvicorn with APP_ENV=test)
 npm run test:frontend # frontend/**/*.test.jsx
 npm run test:watch
-pytest                # used in CI and tests/; deps not in requirements.txt
+pytest -v            # used in CI (.github/workflows/ci.yml) and locally per README; deps not in requirements.txt
+
 ```
 
 Jest API tests spawn a real server (`tests/globalSetup.js`) and reset via `POST /test/reset`. Do not rely on `/test/reset` against a normal development server.
@@ -107,16 +111,26 @@ Jest API tests spawn a real server (`tests/globalSetup.js`) and reset via `POST 
 This module is about grading and governing AI-assisted work, not building new product features by default.
 
 - Prefer **read-only analysis** first.
-- Edit **`docs/` only**, unless the human explicitly approves a different path.
+- Edit `docs/` **only**, unless the human explicitly approves a different path.
 - Do **not** modify `app/` unless the human asks for one specific minimal fix.
 - Use **one bounded task per thread**.
 - When making claims about the repo, **cite files actually inspected**.
 - If uncertain or a file is not visible, say so — **do not invent findings**.
 
-## 5. Security and governance reminders
+## 5. Final project guardrails (docs-first / read-first)
 
-- Do not paste, commit, or expose secrets (`.env`, tokens, credentials). Use `.env.example` as the safe template.
+- **Read before writing.** Before proposing or making any change, read `README.md`, this file (`AGENTS.md`), and the relevant file(s) under `docs/` first. Do not assume repo state from memory or from a prior session.
+- **Branch:** all final-project work happens on `final-project`. Do not commit directly to `main`.
+- **No new product features.** Do not add comments, authentication, a production database, notifications, or unrelated UI changes.
+- `app/` **and** `frontend/` **are protected.** Only touch these for a small, explainable bug fix, security fix, or documentation-supported correction — and log the reason in `docs/final-ai-review.md`.
+- **One bounded task per thread**, same as Module 5.
+- **Cite files actually inspected** when making claims about the repo; do not invent findings, test results, or business rules that weren't verified.
+
+## 6. Security and governance reminders
+
+- Do not paste, commit, or expose secrets (`.env`, tokens, credentials) or real personal/customer data. Use `.env.example` as the safe template.
 - Do not run destructive or irreversible git/system commands unless explicitly requested.
-- Do not invent test results, business rules, or “findings” that were not verified in the repo.
+- Do not invent test results, business rules, or "findings" that were not verified in the repo.
 - Prefer citing concrete paths (for example `app/business_rules.py`) over memory or assumptions.
-- Keep changes minimal and task-scoped; do not refactor unrelated code during Module 5 work.
+- Keep changes minimal and task-scoped; do not refactor unrelated code during final-project work.
+
