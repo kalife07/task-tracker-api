@@ -36,6 +36,15 @@ I did not just accept the AI's note that `/test/reset` is "guarded." I started t
 
 While finalizing `.github/workflows/ci.yml`, AI suggested adding `continue-on-error: true` to the pytest step "to keep the pipeline green during development." I rejected this: a CI pipeline that stays green regardless of test outcomes defeats the purpose of the release-readiness check required in Part B, and would let a real regression merge unnoticed. I kept the workflow failing on any test failure, with no `continue-on-error` and no `|| true` shortcuts anywhere in the file.
 
+## app/ change: DELETE /tasks/{id} route added
+
+This is the one exception to the "protect app/" rule, made per AGENTS.md's allowance for a small, explainable bug fix.
+
+- **What was wrong:** `app/storage.py` already had a working `delete_task(task_id) -> bool` function with a `[VERIFY]` comment noting no route called it. `tests/test_tasks.py` had tests expecting `DELETE /tasks/{id}` to work, but no such route existed in `app/api/routes/tasks.py`, so those requests fell through to FastAPI's default 405 instead of the app's own 404/204 handling. This was caught by graded feedback identifying that `docs/release-evidence.md` claimed a full pass while the suite actually had 2 failing tests for this exact reason.
+- **What was changed:** Added a `DELETE /tasks/{task_id}` route to `app/api/routes/tasks.py`, following the same pattern as the existing `get_task` and `update_task` handlers — calls `storage.delete_task`, returns `204 No Content` on success, raises `404` if the task id doesn't exist. No changes were made to `app/storage.py` or `app/models.py`; the delete logic they already contained was correct and just needed to be wired up.
+- **Why this was in scope:** AGENTS.md permits touching `app/` for "a small bug fix... Explain any such change in docs/final-ai-review.md." This qualifies: it's a single route addition that closes a documented, pre-existing gap rather than a new feature, and it doesn't change any business rule, model, or storage behavior.
+- **Verification status:** The route was added and reviewed against the existing file's conventions, but **has not yet been re-run against the test suite**. Before this is treated as fixed, `pytest -v` needs to be re-run locally and in CI to confirm `test_delete_existing_returns_204_no_body` and `test_delete_missing_returns_404` now pass, and the results in `README.md` / `docs/release-evidence.md` need to be updated with the real output — not assumed.
+
 ## Three AI usage rules
 
 1. Never paste: `.env` values, tokens, credentials, production logs, or real personal/customer task data into any AI tool or into the repo.
