@@ -143,7 +143,7 @@ pytest -v
 
 ```
 
-Result: 16 passed, 2 failed (18 total). Failures: `test_delete_existing_returns_204_no_body` and `test_delete_missing_returns_404`, both returning HTTP 405 instead of the expected status. Root cause: no `DELETE /tasks/{id}` route is registered in `app/api/routes/tasks.py`, even though `storage.delete_task` exists (this gap was already flagged in `AGENTS.md` prior to running the suite). This is a pre-existing gap, not something introduced by final-project work.
+Result: 18 passed, 0 failed. All tests pass, including `test_delete_existing_returns_204_no_body` and `test_delete_missing_returns_404`, which previously failed with HTTP 405 before the `DELETE /tasks/{id}` route was added to `app/api/routes/tasks.py`.
 
 ### How to run with Docker
 
