@@ -1,0 +1,34 @@
+.env
+.git
+venv
+.venv
+__pycache__
+.pytest_cache
+node_modules
+
+# Build artifacts
+build
+dist
+*.egg-info
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+
+# Not needed in the runtime image
+tests
+docs
+frontend
+.github
+README.md
+*.md
+.dockerignore
+Dockerfile
+.gitignore
+
+# Local JSON storage data — do not bake real/local task data into the image.
+# Adjust the path/pattern if your storage file lives somewhere other than data/.
+data/*.json
+*.db
