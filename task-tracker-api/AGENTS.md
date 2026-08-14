@@ -1,4 +1,4 @@
-# [AGENTS.md](http://AGENTS.md)
+# AGENTS.md
 
 Guidance for AI coding agents working in the Task Tracker repository.
 
