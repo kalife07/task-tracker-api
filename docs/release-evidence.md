@@ -13,7 +13,7 @@
 ## CI evidence
 
 - Workflow file: `.github/workflows/ci.yml`
-- Latest run link or note: **Confirmed green.** CI #13 ("Delete .env", commit `a03efff`) passed on the `final-project` branch in 17s, visible in the repo's Actions tab (`kalife07/task-tracker-api`, all workflow runs). This run includes both fixes: the `DELETE /tasks/{id}` route (`app/api/routes/tasks.py`) and the missing `pytest`/`httpx` entries in `requirements.txt` (CI #11, "fixed requirements", also green — the earlier CI #10, "fixed pytest", had failed with `pytest: command not found` before that fix). [REPLACE: paste the exact GitHub Actions run URL for CI #13 from the browser address bar]
+- Latest run link or note: **Confirmed green.** CI #13 ("Delete .env", commit `a03efff`) passed on the `final-project` branch in 17s, visible in the repo's Actions tab (`kalife07/task-tracker-api`, all workflow runs). This run includes both fixes: the `DELETE /tasks/{id}` route (`app/api/routes/tasks.py`) and the missing `pytest`/`httpx` entries in `requirements.txt` (CI #11, "fixed requirements", also green — the earlier CI #10, "fixed pytest", had failed with `pytest: command not found` before that fix). https://github.com/kalife07/task-tracker-api/actions/runs/31971436025
 - Test command used by CI: `pytest -v` (same command used for the local baseline above)
 - Shortcut check: confirmed no `continue-on-error`, no `|| true`, pytest is not skipped, and the Python version (3.12) is explicitly pinned rather than left vague.
 
