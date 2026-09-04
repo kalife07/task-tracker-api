@@ -1,6 +1,6 @@
 # Task Tracker API
 
-A learning-focused REST API built with Python and FastAPI, using JSON file storage f
+A learning-focused REST API built with Python and FastAPI, using JSON file storage.
 
 ## Prerequisites
 
