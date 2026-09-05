@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const serverInfoPath = path.join(__dirname, ".test-server.json");
+const testStoragePath = path.join(__dirname, ".test-storage.json");
 
 function killProcessTree(pid) {
   if (process.platform === "win32") {
@@ -30,4 +31,5 @@ module.exports = async () => {
   const { pid } = JSON.parse(fs.readFileSync(serverInfoPath, "utf8"));
   killProcessTree(pid);
   fs.unlinkSync(serverInfoPath);
+  fs.rmSync(testStoragePath, { force: true });
 };

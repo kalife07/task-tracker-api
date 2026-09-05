@@ -7,6 +7,9 @@ const PORT = process.env.TEST_PORT || "8765";
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 const projectRoot = path.resolve(__dirname, "..");
 const serverInfoPath = path.join(__dirname, ".test-server.json");
+// The spawned server persists tasks to JSON; keep it in a throwaway file
+// so the suite never reads or deletes real task data.
+const testStoragePath = path.join(__dirname, ".test-storage.json");
 
 function resolvePythonExecutable() {
   const candidates = [
@@ -43,12 +46,16 @@ async function waitForServer(url, attempts = 40, delayMs = 250) {
 
 module.exports = async () => {
   const pythonExecutable = resolvePythonExecutable();
+
+  // Start from an empty store even if a previous run was killed mid-suite.
+  fs.rmSync(testStoragePath, { force: true });
+
   const serverProcess = spawn(
     pythonExecutable,
     ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", PORT],
     {
       cwd: projectRoot,
-      env: { ...process.env, APP_ENV: "test" },
+      env: { ...process.env, APP_ENV: "test", STORAGE_FILE: testStoragePath },
       stdio: ["ignore", "pipe", "pipe"],
       detached: process.platform !== "win32",
     }

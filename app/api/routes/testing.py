@@ -13,7 +13,7 @@ router = APIRouter()
     include_in_schema=False,
 )
 def reset_test_storage() -> None:
-    """Clear in-memory task storage. Available only when APP_ENV=test.
+    """Clear task storage, in memory and on disk. Only when APP_ENV=test.
 
     Intended for the JS/Jest test suite's ``beforeEach``/``afterEach``
     hooks, which call this between tests to reset state. Hidden from the

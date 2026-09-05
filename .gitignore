@@ -28,7 +28,10 @@ build/
 
 # JSON data storage files (runtime data, not source)
 app/storage/*.json
+app/storage/*.json.tmp
+app/storage/*.json.corrupt-*
 
 # Node test artifacts
 node_modules/
 tests/.test-server.json
+tests/.test-storage.json

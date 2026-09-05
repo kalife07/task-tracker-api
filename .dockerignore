@@ -29,6 +29,10 @@ Dockerfile
 .gitignore
 
 # Local JSON storage data — do not bake real/local task data into the image.
-# Adjust the path/pattern if your storage file lives somewhere other than data/.
+# The app writes app/storage/storage.json at runtime; mount a volume there
+# if the container's tasks need to outlive the container.
+app/storage/*.json
+app/storage/*.json.tmp
+app/storage/*.json.corrupt-*
 data/*.json
 *.db

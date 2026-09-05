@@ -40,7 +40,7 @@ pip install -r requirements.txt
 
 ## 2. Configure environment variables
 
-Copy the example file and adjust values as needed:
+Copy the example file and adjust values as needed. `STORAGE_FILE` is optional — see [Storage](#storage) below.
 
 **Linux/macOS**
 
@@ -110,6 +110,30 @@ Expected response:
 }
 
 
+```
+
+---
+
+## Storage
+
+Tasks are persisted to a JSON file, so they survive a server restart.
+
+- **Default location:** `app/storage/storage.json` (created on the first write).
+- **Override:** set `STORAGE_FILE` in `.env` or the environment.
+- **Under `APP_ENV=test`:** defaults to `app/storage/storage.test.json` instead, so running the tests never touches real task data.
+
+The file is the whole persistence layer — there is no database. `app/storage.py` holds tasks in a dict and rewrites the file after each create/update/delete, writing to a `.tmp` file and renaming it into place so an interrupted write cannot corrupt the store. If the file ever *is* unreadable, it is renamed to `storage.json.corrupt-<timestamp>` and the app starts empty rather than overwriting it.
+
+The file is gitignored. Back it up by copying it:
+
+```bash
+cp app/storage/storage.json app/storage/storage.backup.json
+```
+
+Under Docker the file lives inside the container and disappears with it — mount a volume to keep it:
+
+```bash
+docker run -p 8000:8000 -v "$(pwd)/data:/app/app/storage" task-tracker
 ```
 
 ---
