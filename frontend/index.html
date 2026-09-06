@@ -196,7 +196,14 @@
   </div>
 
   <script>
-    const API_BASE = 'http://localhost:8000';
+    // Served by the API itself (http://localhost:8000), so talk to the
+    // origin this page came from — that keeps requests same-origin whether
+    // it is reached via localhost or 127.0.0.1. Opening the file directly
+    // from disk (file://) has no usable origin, so fall back to the
+    // default dev server address.
+    const API_BASE = window.location.protocol.startsWith('http')
+      ? window.location.origin
+      : 'http://localhost:8000';
     const MAX_TAGS = 10;
     const MAX_TAG_LENGTH = 30;
     const STATUS_ORDER = ['ToDo', 'InProgress', 'Done'];

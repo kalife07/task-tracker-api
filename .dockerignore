@@ -20,13 +20,17 @@ Thumbs.db
 # Not needed in the runtime image
 tests
 docs
-frontend
 .github
 README.md
 *.md
 .dockerignore
 Dockerfile
 .gitignore
+
+# The React port under frontend/src is not wired into the served page,
+# and its tests are not needed at runtime.
+frontend/src
+frontend/jest.setup.js
 
 # Local JSON storage data — do not bake real/local task data into the image.
 # The app writes app/storage/storage.json at runtime; mount a volume there

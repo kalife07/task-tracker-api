@@ -22,7 +22,7 @@ npm install
 uvicorn app.main:app --reload --port 8000
 ```
 
-API at `http://localhost:8000`, Swagger UI at `http://localhost:8000/docs`. The frontend is a static file — open `frontend/index.html` directly in a browser (it calls the API at `http://localhost:8000` via a hardcoded `API_BASE`).
+The Kanban board is at `http://localhost:8000` (the app serves `frontend/index.html` there), Swagger UI at `http://localhost:8000/docs`. Opening `frontend/index.html` straight from disk still works for quick UI-only tweaks; it falls back to calling `http://localhost:8000`.
 
 ## Tests
 
@@ -55,9 +55,10 @@ Request flow: `app/api/routes/*.py` (FastAPI routers, registered in `app/main.py
 - **`app/task_query.py`** — `TaskQueryFilters` dataclass + predicate builder for `GET /tasks?status=&priority=&overdue=&tag=`. Tag filtering is exact-match, case-insensitive (not substring/fuzzy — rejected by design, see mini-adr).
 - **`app/storage.py`** — module-level `_tasks` dict is the working copy; it is loaded lazily from `settings.storage_path` on the first storage call and rewritten (atomically, via a `.tmp` file + `os.replace`, under a `threading.RLock`) after every mutation. `is_overdue` is excluded from what's written, since it's computed at read time. A file that fails to parse is renamed `*.corrupt-<timestamp>` and storage starts empty rather than silently overwriting it. `_reset()` (clears memory *and* deletes the file) and `_use_storage_path()` are test-only plumbing; `_reset` is exposed over HTTP by `app/api/routes/testing.py` when `APP_ENV=test`.
 - **`app/core/config.py`** — `Settings` (pydantic-settings) reads `.env` / process env; `port`, `app_env`, `storage_file`. `settings.storage_path` resolves the storage file: `STORAGE_FILE` when set, else `app/storage/storage.json`, or `app/storage/storage.test.json` when `APP_ENV=test` — the test default exists so a test run can never delete real task data. Import the shared `settings` instance rather than constructing a new one.
-- **Route split**: `health.py` (`/health`), `tasks.py` (`/tasks*`), `testing.py` (`/test/reset`, hidden from OpenAPI via `include_in_schema=False`). Add new resources as a new module under `app/api/routes/` and register the router in `app/main.py`.
+- **Route split**: `health.py` (`/health`), `tasks.py` (`/tasks*`), `version.py` (`/version`), `ui.py` (`/` serves `frontend/index.html`, `/favicon.ico` returns 204), `testing.py` (`/test/reset`, hidden from OpenAPI via `include_in_schema=False`). Add new resources as a new module under `app/api/routes/` and register the router in `app/main.py`.
 
 ### Frontend
 
+- `frontend/index.html` is served by the API itself at `/` (`app/api/routes/ui.py`, a `FileResponse`), so `http://localhost:8000` opens the board. `API_BASE` is `window.location.origin` when the page is served over http(s), falling back to `http://localhost:8000` when the file is opened directly from disk — keep it origin-relative, since the app has no CORS middleware and a cross-origin `API_BASE` breaks every request.
 - `frontend/index.html` is a single self-contained file: inline `<style>` + inline `<script>` vanilla JS Kanban board (drag-and-drop between status columns, task modal, tag/overdue filtering). It duplicates logic (date formatting, overdue calc, tag collection) that also exists in the React components — when changing task-card/filter behavior, check whether both need updating.
 - `frontend/src/components/*.jsx` — React ports of the same pieces (`TaskCard`, `TaskModal`, `TagInput`, `BoardToolbar`), covered by colocated `*.test.jsx` files under `testing-library/react` + jsdom. No app entry point wires these together yet.

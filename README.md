@@ -82,20 +82,27 @@ uvicorn app.main:app --reload --port 8000
 
 ```
 
-The API will be available at `http://localhost:8000`.
+Open `http://localhost:8000` — the app serves the Kanban board there, where you can create, edit, drag, and delete tasks.
 
-Interactive docs (Swagger UI) are at `http://localhost:8000/docs`.
+Interactive API docs (Swagger UI) are at `http://localhost:8000/docs`. The API routes are `/health`, `/version`, and `/tasks`.
 
 ---
 
 ## 4. Test the health endpoint
 
+**Linux/macOS**
+
 ```bash
-
-curl -s [http://localhost:8000/health](http://localhost:8000/health)
-
-
+curl -s http://localhost:8000/health
 ```
+
+**Windows (PowerShell)**
+
+```powershell
+Invoke-RestMethod http://localhost:8000/health
+```
+
+In Windows PowerShell, `curl` is an alias for `Invoke-WebRequest` and does not accept `-s`. Use `Invoke-RestMethod` as above, or call the real binary with `curl.exe -s http://localhost:8000/health`.
 
 Expected response:
 

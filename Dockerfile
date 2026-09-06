@@ -21,6 +21,9 @@
     
     # Copy only the application package needed at runtime.
     COPY --chown=app:app app ./app
+
+    # The board UI is served by the app at "/" (see app/api/routes/ui.py).
+    COPY --chown=app:app frontend ./frontend
     
     ENV PATH=/home/app/.local/bin:$PATH \
         PYTHONUNBUFFERED=1

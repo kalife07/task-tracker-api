@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.api.routes.health import router as health_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.testing import router as testing_router
+from app.api.routes.ui import router as ui_router
 from app.api.routes.version import router as version_router
 
 # Create the FastAPI application instance.
@@ -26,6 +27,8 @@ app.include_router(health_router)
 app.include_router(tasks_router)
 app.include_router(testing_router)
 app.include_router(version_router)
+# Serves the Kanban board UI at "/" (see app/api/routes/ui.py).
+app.include_router(ui_router)
 
 
 # Optional: log the active environment on startup so it's clear which
